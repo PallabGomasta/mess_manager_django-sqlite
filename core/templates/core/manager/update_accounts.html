@@ -1,0 +1,490 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Update Accounts - {{ mess.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .forms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .form-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        height: fit-content;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 1.25rem;
+        border-radius: 12px;
+        margin: -2rem -2rem 2rem -2rem;
+        text-align: center;
+    }
+    
+    .form-header.meal {
+        background: linear-gradient(135deg, var(--success), #2ecc71);
+    }
+    
+    .form-header.expense {
+        background: linear-gradient(135deg, var(--danger), #e74c3c);
+    }
+    
+    .form-header.deposit {
+        background: linear-gradient(135deg, var(--info), #3498db);
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .meal-inputs {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+    }
+    
+    .meal-input {
+        text-align: center;
+        font-weight: 600;
+        font-size: 1.1rem;
+        padding: 1rem;
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        transition: var(--transition);
+    }
+    
+    .meal-input:focus {
+        border-color: var(--success);
+        box-shadow: 0 0 0 0.3rem rgba(40, 167, 69, 0.15);
+    }
+    
+    .submit-btn {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: var(--transition);
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-2px);
+    }
+    
+    .records-section {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .section-title {
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--light);
+    }
+    
+    .records-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+    
+    .record-column {
+        background: var(--light);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    
+    .record-item {
+        background: white;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid var(--primary);
+    }
+    
+    .record-item.meal {
+        border-left-color: var(--success);
+    }
+    
+    .record-item.expense {
+        border-left-color: var(--danger);
+    }
+    
+    .record-item.deposit {
+        border-left-color: var(--info);
+    }
+    
+    .record-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .record-title {
+        font-weight: 600;
+        color: var(--dark);
+        margin: 0;
+    }
+    
+    .record-amount {
+        font-weight: 700;
+        color: var(--success);
+    }
+    
+    .record-amount.expense {
+        color: var(--danger);
+    }
+    
+    .record-details {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .empty-records {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+    
+    .empty-records i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .forms-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .form-card {
+            padding: 1.5rem;
+        }
+        
+        .form-header {
+            margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+            padding: 1rem;
+        }
+        
+        .meal-inputs {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .records-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .records-section {
+            padding: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Update Accounts</h2>
+            <p class="mb-0 opacity-90">{{ mess.name }} - {{ today|date:"F j, Y" }}</p>
+        </div>
+        <a href="{% url 'mess_dashboard' mess.id %}" class="btn btn-light">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="forms-grid">
+    <div class="form-card">
+        <div class="form-header meal">
+            <h5 class="mb-0"><i class="fas fa-utensils me-2"></i>Add Meal Entry</h5>
+        </div>
+        <form method="post" action="{% url 'add_meal' mess.id %}" id="mealForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Member</label>
+                <select name="user" class="form-select" required>
+                    <option value="">Select Member</option>
+                    {% for member in members %}
+                    <option value="{{ member.user.id }}">{{ member.user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Date</label>
+                <input type="date" name="date" class="form-control" value="{{ today|date:'Y-m-d' }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Meals</label>
+                <div class="meal-inputs">
+                    <div>
+                        <label class="form-label text-center d-block">Breakfast</label>
+                        <input type="number" name="breakfast" class="form-control meal-input" value="0" min="0" required>
+                    </div>
+                    <div>
+                        <label class="form-label text-center d-block">Lunch</label>
+                        <input type="number" name="lunch" class="form-control meal-input" value="0" min="0" required>
+                    </div>
+                    <div>
+                        <label class="form-label text-center d-block">Dinner</label>
+                        <input type="number" name="dinner" class="form-control meal-input" value="0" min="0" required>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success submit-btn">
+                <i class="fas fa-save me-2"></i>Save Meal Entry
+            </button>
+        </form>
+    </div>
+
+    <div class="form-card">
+        <div class="form-header expense">
+            <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Add Expense</h5>
+        </div>
+        <form method="post" action="{% url 'add_expense' mess.id %}" id="expenseForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Amount</label>
+                <input type="number" name="amount" class="form-control" step="0.01" 
+                         placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <input type="text" name="description" class="form-control" 
+                       placeholder="e.g., Grocery, Vegetables, Chicken, etc." required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Date</label>
+                <input type="date" name="date" class="form-control" value="{{ today|date:'Y-m-d' }}" required>
+            </div>
+            <button type="submit" class="btn btn-danger submit-btn">
+                <i class="fas fa-plus me-2"></i>Add Expense
+            </button>
+        </form>
+    </div>
+
+    <div class="form-card">
+        <div class="form-header deposit">
+            <h5 class="mb-0"><i class="fas fa-piggy-bank me-2"></i>Add Deposit</h5>
+        </div>
+        <form method="post" action="{% url 'add_deposit' mess.id %}" id="depositForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Member</label>
+                <select name="user" class="form-select" required>
+                    <option value="">Select Member</option>
+                    {% for member in members %}
+                    <option value="{{ member.user.id }}">{{ member.user.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Amount</label>
+                <input type="number" name="amount" class="form-control" step="0.01"
+                         placeholder="0.00" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Date</label>
+                <input type="date" name="date" class="form-control" value="{{ today|date:'Y-m-d' }}" required>
+            </div>
+            <button type="submit" class="btn btn-info submit-btn">
+                <i class="fas fa-plus me-2"></i>Add Deposit
+            </button>
+        </form>
+    </div>
+</div>
+
+<div class="records-section">
+    <div class="d-flex align-items-center mb-4">
+        <i class="fas fa-calendar-day text-primary fs-3 me-3"></i>
+        <h4 class="text-primary mb-0">Today's Records ({{ today|date:"F j, Y" }})</h4>
+    </div>
+    
+    <div class="records-grid">
+        <div class="record-column">
+            <h5 class="text-success mb-3"><i class="fas fa-utensils me-2"></i>Meals</h5>
+            {% if today_meals %}
+            {% for meal in today_meals %}
+            <div class="record-item meal">
+                <div class="record-header">
+                    <h6 class="record-title">{{ meal.user.username }}</h6>
+                    <span class="record-amount">
+                        {{ meal.breakfast|add:meal.lunch|add:meal.dinner }} meals
+                    </span>
+                </div>
+                <p class="record-details">
+                    B: {{ meal.breakfast }}, L: {{ meal.lunch }}, D: {{ meal.dinner }}
+                </p>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-records">
+                <i class="fas fa-utensils"></i>
+                <p class="mb-0">No meals recorded today</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="record-column">
+            <h5 class="text-danger mb-3"><i class="fas fa-money-bill-wave me-2"></i>Expenses</h5>
+            {% if today_expenses %}
+            {% for expense in today_expenses %}
+            <div class="record-item expense">
+                <div class="record-header">
+                    <h6 class="record-title">{{ expense.description }}</h6>
+                    <span class="record-amount expense">{{ expense.amount|floatformat:2 }}</span>
+                </div>
+                <p class="record-details">
+                    By: {{ expense.created_by.username }}
+                </p>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-records">
+                <i class="fas fa-money-bill-wave"></i>
+                <p class="mb-0">No expenses today</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="record-column">
+            <h5 class="text-info mb-3"><i class="fas fa-piggy-bank me-2"></i>Deposits</h5>
+            {% if today_deposits %}
+            {% for deposit in today_deposits %}
+            <div class="record-item deposit">
+                <div class="record-header">
+                    <h6 class="record-title">{{ deposit.user.username }}</h6>
+                    <span class="record-amount">{{ deposit.amount|floatformat:2 }}</span>
+                </div>
+                <p class="record-details">
+                    Deposited on {{ deposit.date|date:"M j" }}
+                </p>
+            </div>
+            {% endfor %}
+            {% else %}
+            <div class="empty-records">
+                <i class="fas fa-piggy-bank"></i>
+                <p class="mb-0">No deposits today</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = {
+        meal: document.getElementById('mealForm'),
+        expense: document.getElementById('expenseForm'),
+        deposit: document.getElementById('depositForm')
+    };
+     
+    Object.values(forms).forEach(form => {
+        if (form) {
+            form.addEventListener('submit', function() {
+                const submitBtn = this.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                    submitBtn.disabled = true;
+        
+                    setTimeout(() => {
+                        if (submitBtn.isConnected) {
+                            submitBtn.innerHTML = originalText;
+                            submitBtn.disabled = false;
+                        }
+                    }, 5000);
+                }
+            });
+        }
+    });
+    
+    const mealInputs = document.querySelectorAll('.meal-input');
+    mealInputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.select();
+        });
+        
+        input.addEventListener('change', function() {
+            if (this.value < 0) this.value = 0;
+        });
+    });
+    
+    const amountInputs = document.querySelectorAll('input[name="amount"]');
+    amountInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value) {
+                this.value = parseFloat(this.value).toFixed(2);
+            }
+        });
+    });
+    
+    const validateForm = (form) => {
+        const inputs = form.querySelectorAll('input[required], select[required]');
+        let isValid = true;
+        
+        inputs.forEach(input => {
+            if (!input.value.trim()) {
+                input.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                input.classList.remove('is-invalid');
+            }
+        });
+        
+        return isValid;
+    };
+    
+    Object.values(forms).forEach(form => {
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                if (!validateForm(this)) {
+                    e.preventDefault();
+                    const firstError = this.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        firstError.focus();
+                    }
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

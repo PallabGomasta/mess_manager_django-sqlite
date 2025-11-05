@@ -1,0 +1,383 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        padding: 4rem 0;
+        text-align: center;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: #ffffff;
+        background-clip: text;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.3rem;
+        color: #e2e2e2;
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .hero-logo {
+        height: 100px;
+        margin-bottom: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        transition: var(--transition);
+    }
+    
+    .hero-logo:hover {
+        transform: scale(1.05);
+    }
+    
+    .action-card {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        margin-bottom: 2rem;
+    }
+    
+    .action-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 1.5rem;
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        text-align: center;
+    }
+    
+    .action-body {
+        padding: 2rem;
+    }
+    
+    .mess-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+    
+    .mess-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        transition: var(--transition);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .mess-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+    
+    .welcome-card {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .welcome-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        font-size: 1.5rem;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .hero-logo {
+            height: 80px;
+        }
+        
+        .action-body {
+            padding: 1.5rem;
+        }
+        
+        .mess-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .btn-lg {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+        }
+        
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <img src="/static/images/logo.png" alt="Mess Manager Logo" class="hero-logo animate-slideIn">
+    <h1 class="hero-title animate-slideIn">Welcome to Mess Manager</h1>
+    <p class="hero-subtitle animate-fadeIn">Efficiently manage your hostel/mess expenses, meals, and finances in one place</p>
+</div>
+
+{% if user.is_authenticated %}
+<div class="action-card animate-fadeIn">
+    <div class="action-header">
+        <h3 class="mb-0"><i class="fas fa-rocket me-2"></i>What would you like to do?</h3>
+    </div>
+    <div class="action-body text-center">
+        <div class="d-flex flex-wrap justify-content-center gap-3 mb-4">
+            <button class="btn btn-primary btn-lg" data-bs-toggle="modal" data-bs-target="#createMessModal">
+                <i class="fas fa-plus-circle me-2"></i>Create New Mess
+            </button>
+            <button class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#joinMessModal">
+                <i class="fas fa-sign-in-alt me-2"></i>Join Existing Mess
+            </button>
+        </div>
+
+        {% if user_messes %}
+        <div class="mt-4">
+            <h4 class="text-primary mb-3"><i class="fas fa-home me-2"></i>Your Messes</h4>
+            <div class="mess-grid">
+                {% for membership in user_messes %}
+                <div class="mess-card">
+                    <div class="text-center">
+                        <h5 class="text-primary mb-2">{{ membership.mess.name }}</h5>
+                        <p class="text-muted small mb-2">{{ membership.mess.address|truncatewords:10 }}</p>
+                        
+                        <div class="d-flex justify-content-center align-items-center gap-2 mb-3">
+                            <span class="badge bg-{% if membership.role == 'manager' %}primary{% else %}secondary{% endif %}">
+                                <i class="fas {% if membership.role == 'manager' %}fa-crown{% else %}fa-user{% endif %} me-1"></i>
+                                {{ membership.role|title }}
+                            </span>
+                            <span class="badge bg-light text-dark">
+                                <i class="fas fa-key me-1"></i>{{ membership.mess.code }}
+                            </span>
+                        </div>
+                        
+                        <a href="{% if membership.role == 'manager' %}{% url 'mess_dashboard' membership.mess.id %}{% else %}{% url 'member_dashboard' membership.mess.id %}{% endif %}" 
+                           class="btn btn-outline-primary btn-sm w-100">
+                            <i class="fas fa-tachometer-alt me-1"></i>Go to Dashboard
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No messes yet</h5>
+            <p class="text-muted">Create or join a mess to start managing your expenses</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<div class="welcome-card animate-fadeIn">
+    <h3 class="text-primary mb-3">Join Mess Manager Today</h3>
+    <p class="text-muted mb-4">Manage your mess expenses efficiently with our comprehensive platform</p>
+    
+    <div class="d-flex flex-wrap justify-content-center gap-3">
+        <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-sign-in-alt me-2"></i>Sign In
+        </a>
+        <a href="{% url 'signup' %}" class="btn btn-success btn-lg">
+            <i class="fas fa-user-plus me-2"></i>Create Account
+        </a>
+    </div>
+    
+    <div class="row mt-5 text-start">
+        <div class="col-md-4 mb-3">
+            <div class="d-flex align-items-start">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <div class="ms-3">
+                    <h6>Expense Tracking</h6>
+                    <p class="text-muted small">Track all mess expenses in one place</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="d-flex align-items-start">
+                <div class="feature-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <div class="ms-3">
+                    <h6>Meal Management</h6>
+                    <p class="text-muted small">Manage daily meals efficiently</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="d-flex align-items-start">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="ms-3">
+                    <h6>Multi-user</h6>
+                    <p class="text-muted small">Collaborate with mess members</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="modal fade" id="createMessModal" tabindex="-1" aria-labelledby="createMessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="createMessModalLabel">
+                    <i class="fas fa-plus-circle me-2"></i>Create New Mess
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'create_mess' %}" id="createMessForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mess Name *</label>
+                        <input type="text" class="form-control" name="name" required 
+                               placeholder="Enter mess name" autocomplete="off">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Address *</label>
+                        <textarea class="form-control" name="address" rows="3" required 
+                                  placeholder="Enter mess address"></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary py-2">
+                            <i class="fas fa-plus me-2"></i>Create Mess
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="joinMessModal" tabindex="-1" aria-labelledby="joinMessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="joinMessModalLabel">
+                    <i class="fas fa-sign-in-alt me-2"></i>Join Existing Mess
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'join_mess' %}" id="joinMessForm">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Mess Code *</label>
+                        <input type="text" class="form-control" name="code" required maxlength="6" 
+                               placeholder="Enter 6-digit code" pattern="[0-9]{6}" title="Please enter a 6-digit code">
+                        <div class="form-text">Get the 6-digit code from your mess manager</div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success py-2">
+                            <i class="fas fa-sign-in-alt me-2"></i>Join Mess
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const createForm = document.getElementById('createMessForm');
+    const joinForm = document.getElementById('joinMessForm');
+    
+    if (createForm) {
+        createForm.addEventListener('submit', function(e) {
+            const nameInput = this.querySelector('input[name="name"]');
+            const addressInput = this.querySelector('textarea[name="address"]');
+            
+            if (!nameInput.value.trim()) {
+                e.preventDefault();
+                showValidationError(nameInput, 'Please enter a mess name');
+            }
+            
+            if (!addressInput.value.trim()) {
+                e.preventDefault();
+                showValidationError(addressInput, 'Please enter a mess address');
+            }
+        });
+    }
+    
+    if (joinForm) {
+        joinForm.addEventListener('submit', function(e) {
+            const codeInput = this.querySelector('input[name="code"]');
+            
+            if (!codeInput.value.match(/^\d{6}$/)) {
+                e.preventDefault();
+                showValidationError(codeInput, 'Please enter a valid 6-digit code');
+            }
+        });
+    }
+    
+    function showValidationError(input, message) {
+        const existingError = input.parentNode.querySelector('.invalid-feedback');
+        if (existingError) {
+            existingError.remove();
+        }
+        
+        input.classList.add('is-invalid');
+
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'invalid-feedback';
+        errorDiv.textContent = message;
+        input.parentNode.appendChild(errorDiv);
+
+        input.focus();
+    }
+    
+    document.querySelectorAll('input, textarea').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+            const error = this.parentNode.querySelector('.invalid-feedback');
+            if (error) {
+                error.remove();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

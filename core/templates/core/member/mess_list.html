@@ -1,0 +1,383 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Messes - Mess Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    .messes-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        text-align: center;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .messes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .mess-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 0;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        transition: var(--transition);
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        overflow: hidden;
+    }
+    
+    .mess-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        color: inherit;
+        text-decoration: none;
+    }
+    
+    .mess-card-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 1.5rem;
+        position: relative;
+    }
+    
+    .mess-card-body {
+        padding: 1.5rem;
+    }
+    
+    .mess-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: white;
+    }
+    
+    .mess-address {
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+    }
+    
+    .mess-code {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-block;
+    }
+    
+    .mess-details {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .detail-item {
+        text-align: center;
+        padding: 0.75rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+    }
+    
+    .detail-label {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin-bottom: 0.25rem;
+    }
+    
+    .detail-value {
+        font-weight: 600;
+        color: var(--dark);
+        margin: 0;
+    }
+    
+    .role-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.8rem;
+    }
+    
+    .action-btn {
+        width: 100%;
+        padding: 0.75rem;
+        border-radius: 10px;
+        font-weight: 600;
+        text-align: center;
+        background: var(--primary);
+        color: white;
+        border: none;
+        transition: var(--transition);
+    }
+    
+    .action-btn:hover {
+        background: var(--secondary);
+        transform: translateY(-2px);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        color: #dee2e6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .empty-state-title {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state-text {
+        color: #6c757d;
+        margin-bottom: 2rem;
+    }
+    
+    .create-mess-btn {
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        text-decoration: none;
+        transition: var(--transition);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .create-mess-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    @media (max-width: 768px) {
+        .messes-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .page-header {
+            padding: 1.5rem;
+        }
+        
+        .mess-card-header {
+            padding: 1.25rem;
+        }
+        
+        .mess-card-body {
+            padding: 1.25rem;
+        }
+        
+        .mess-details {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .role-badge {
+            position: relative;
+            top: 0;
+            right: 0;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="messes-container">
+    <div class="page-header">
+        <h1 class="fw-bold mb-3">My Messes</h1>
+        <p class="lead mb-0">Manage all your mess memberships in one place</p>
+    </div>
+
+    {% if user_messes %}
+    <div class="messes-grid">
+        {% for membership in user_messes %}
+        <a href="{% url 'member_dashboard' membership.mess.id %}" class="mess-card">
+            <div class="mess-card-header">
+                <span class="role-badge bg-{% if membership.role == 'manager' %}warning{% else %}light text-dark{% endif %}">
+                    <i class="fas {% if membership.role == 'manager' %}fa-crown{% else %}fa-user{% endif %} me-1"></i>
+                    {{ membership.role|title }}
+                </span>
+                <h3 class="mess-name">{{ membership.mess.name }}</h3>
+                <p class="mess-address">{{ membership.mess.address|truncatewords:8 }}</p>
+                <span class="mess-code">
+                    <i class="fas fa-key me-1"></i>Code: {{ membership.mess.code }}
+                </span>
+            </div>
+            <div class="mess-card-body">
+                <div class="mess-details">
+                    <div class="detail-item">
+                        <div class="detail-label">Joined On</div>
+                        <div class="detail-value">{{ membership.joined_at|date:"M d, Y" }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">Your Role</div>
+                        <div class="detail-value">{{ membership.role|title }}</div>
+                    </div>
+                </div>
+                <button class="action-btn">
+                    <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                </button>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-home empty-state-icon"></i>
+        <h3 class="empty-state-title">No Messes Yet</h3>
+        <p class="empty-state-text">
+            You haven't joined any mess yet. Create a new mess or join an existing one to get started.
+        </p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createMessModal">
+                <i class="fas fa-plus me-2"></i>Create Mess
+            </button>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#joinMessModal">
+                <i class="fas fa-sign-in-alt me-2"></i>Join Mess
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="createMessModal" tabindex="-1" aria-labelledby="createMessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="createMessModalLabel">
+                    <i class="fas fa-plus-circle me-2"></i>Create New Mess
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'create_mess' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Mess Name *</label>
+                        <input type="text" class="form-control" name="name" required 
+                               placeholder="Enter mess name">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Address *</label>
+                        <textarea class="form-control" name="address" rows="3" required 
+                                  placeholder="Enter mess address"></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Create Mess
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="joinMessModal" tabindex="-1" aria-labelledby="joinMessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="joinMessModalLabel">
+                    <i class="fas fa-sign-in-alt me-2"></i>Join Existing Mess
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'join_mess' %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Mess Code *</label>
+                        <input type="text" class="form-control" name="code" required maxlength="6" 
+                               placeholder="Enter 6-digit code">
+                        <div class="form-text">Get the code from your mess manager</div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-sign-in-alt me-2"></i>Join Mess
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const messCards = document.querySelectorAll('.mess-card');
+    messCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-fadeIn');
+    });
+
+    const cards = document.querySelectorAll('.mess-card');
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.15)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = 'var(--box-shadow)';
+        });
+    });
+
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const inputs = this.querySelectorAll('input[required], textarea[required]');
+            let isValid = true;
+            
+            inputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            });
+            
+            if (!isValid) {
+                e.preventDefault();
+                const firstError = this.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

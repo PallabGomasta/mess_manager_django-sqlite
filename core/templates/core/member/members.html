@@ -1,0 +1,324 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Members - {{ mess.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .members-container {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .members-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .members-count {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+    
+    .members-body {
+        padding: 0;
+    }
+    
+    .members-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    
+    .members-table th {
+        background: #f8f9fa;
+        padding: 1.25rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .members-table td {
+        padding: 1.25rem;
+        border-bottom: 1px solid #f1f3f4;
+        vertical-align: middle;
+    }
+    
+    .members-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .members-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .user-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .user-details {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .username {
+        font-weight: 600;
+        color: var(--dark);
+        margin: 0;
+    }
+    
+    .user-email {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+    
+    .role-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 500;
+        font-size: 0.85rem;
+    }
+    
+    .join-date {
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .empty-members {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6c757d;
+    }
+    
+    .empty-members i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    @media (max-width: 768px) {
+        .members-header {
+            padding: 1.25rem;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .members-table th,
+        .members-table td {
+            padding: 1rem;
+        }
+        
+        .user-info {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+        
+        .members-table {
+            font-size: 0.9rem;
+        }
+        
+        .role-badge {
+            font-size: 0.8rem;
+            padding: 0.4rem 0.8rem;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .members-table {
+            font-size: 0.85rem;
+        }
+        
+        .members-table th,
+        .members-table td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .user-avatar {
+            width: 30px;
+            height: 30px;
+            font-size: 0.9rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Mess Members</h2>
+            <p class="mb-0 opacity-90">{{ mess.name }}</p>
+        </div>
+        <a href="{% url 'member_dashboard' mess.id %}" class="btn btn-light">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="members-container">
+    <div class="members-header">
+        <div class="d-flex align-items-center gap-3">
+            <i class="fas fa-users fa-2x"></i>
+            <div>
+                <h4 class="mb-0">All Members</h4>
+                <p class="mb-0 opacity-90">Total members in your mess</p>
+            </div>
+        </div>
+        <span class="members-count">
+            <i class="fas fa-user me-1"></i>{{ members|length }} Members
+        </span>
+    </div>
+    
+    <div class="members-body">
+        {% if members %}
+        <div class="table-responsive">
+            <table class="members-table">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th>Role</th>
+                        <th>Joined Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                    <tr>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    {{ member.user.username|first|upper }}
+                                </div>
+                                <div class="user-details">
+                                    <span class="username">
+                                        {{ member.user.username }}
+                                        {% if member.user == request.user %}
+                                        <span class="badge bg-info ms-2">You</span>
+                                        {% endif %}
+                                    </span>
+                                    {% if member.user.email %}
+                                    <span class="user-email">{{ member.user.email }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="role-badge bg-{% if member.role == 'manager' %}primary{% else %}secondary{% endif %}">
+                                <i class="fas {% if member.role == 'manager' %}fa-crown{% else %}fa-user{% endif %} me-1"></i>
+                                {{ member.role|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="join-date">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                {{ member.joined_at|date:"M d, Y" }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-members">
+            <i class="fas fa-users"></i>
+            <h4 class="text-muted mb-2">No Members Found</h4>
+            <p class="text-muted">There are no members in this mess yet</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tableRows = document.querySelectorAll('.members-table tbody tr');
+    tableRows.forEach((row, index) => {
+        row.style.animationDelay = `${index * 0.05}s`;
+        row.classList.add('animate-fadeIn');
+    });
+
+    const currentUserRows = document.querySelectorAll('.members-table tbody tr');
+    currentUserRows.forEach(row => {
+        if (row.textContent.includes('You')) {
+            row.style.backgroundColor = '#f0f4ff';
+            row.style.borderLeft = '4px solid var(--primary)';
+        }
+    });
+
+    const addSearchFunctionality = () => {
+        const searchInput = document.createElement('input');
+        searchInput.type = 'text';
+        searchInput.placeholder = 'Search members...';
+        searchInput.className = 'form-control mb-3';
+        searchInput.style.maxWidth = '300px';
+        
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('.members-table tbody tr');
+            
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        const header = document.querySelector('.members-header');
+        header.appendChild(searchInput);
+    };
+});
+</script>
+{% endblock %}
+{% endblock %}

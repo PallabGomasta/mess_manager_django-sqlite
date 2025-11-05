@@ -1,0 +1,291 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Dashboard - {{ mess.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: var(--box-shadow);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+    }
+    
+    .dashboard-header-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+    
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: var(--transition);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-card i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .stat-card h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+    }
+    
+    .stat-card p {
+        color: #6c757d;
+        margin: 0;
+        font-weight: 500;
+    }
+    
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .quick-action-btn {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.5rem 1rem;
+        text-align: center;
+        text-decoration: none;
+        color: var(--dark);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 120px;
+    }
+    
+    .quick-action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .quick-action-btn i {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .quick-action-btn div {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    
+    .recent-activity {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .activity-placeholder {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+    
+    .activity-placeholder i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header {
+            padding: 1.5rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .quick-actions-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .quick-action-btn {
+            min-height: 100px;
+            padding: 1rem 0.5rem;
+        }
+        
+        .quick-action-btn i {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="dashboard-header-content">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold mb-2">{{ mess.name }}</h1>
+                <p class="lead mb-2 opacity-90">{{ mess.address }}</p>
+                <span class="badge bg-light text-primary fs-6">
+                    <i class="fas fa-key me-1"></i>Mess Code: {{ mess.code }}
+                </span>
+            </div>
+            <div class="col-md-4 text-md-end">
+                <span class="badge bg-warning text-dark fs-6 px-3 py-2">
+                    <i class="fas fa-crown me-1"></i>Manager
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <h3>{{ total_members }}</h3>
+        <p>Total Members</p>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-utensils"></i>
+        <h3>{{ total_meals }}</h3>
+        <p>Total Meals</p>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-money-bill-wave"></i>
+        <h3>{{ total_expense|floatformat:2 }}</h3>
+        <p>Total Expense</p>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-piggy-bank"></i>
+        <h3>{{ total_deposit|floatformat:2 }}</h3>
+        <p>Total Deposit</p>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="glass-card p-4 mb-4">
+    <div class="d-flex align-items-center mb-4">
+        <i class="fas fa-bolt text-primary fs-3 me-3"></i>
+        <h4 class="text-primary mb-0">Quick Actions</h4>
+    </div>
+    
+    <div class="quick-actions-grid">
+        <a href="{% url 'manage_members' mess.id %}" class="quick-action-btn">
+            <i class="fas fa-users"></i>
+            <div>Manage Members</div>
+        </a>
+        <a href="{% url 'update_accounts' mess.id %}" class="quick-action-btn">
+            <i class="fas fa-edit"></i>
+            <div>Update Accounts</div>
+        </a>
+        <a href="{% url 'view_reports' mess.id %}" class="quick-action-btn">
+            <i class="fas fa-chart-bar"></i>
+            <div>View Reports</div>
+        </a>
+        <a href="{% url 'manager_messages' mess.id %}" class="quick-action-btn">
+            <i class="fas fa-comments"></i>
+            <div>Messages</div>
+        </a>
+        <a href="{% url 'download_report_pdf' mess.id %}" class="quick-action-btn">
+            <i class="fas fa-download"></i>
+            <div>Download PDF</div>
+        </a>
+        <a href="{% url 'role_change' mess.id %}" class="quick-action-btn">
+            <i class="fas fa-exchange-alt"></i>
+            <div>Role Change</div>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="recent-activity">
+    <div class="d-flex align-items-center mb-4">
+        <i class="fas fa-history text-primary fs-3 me-3"></i>
+        <h4 class="text-primary mb-0">Recent Activity</h4>
+    </div>
+    
+    <div class="activity-placeholder">
+        <i class="fas fa-chart-line"></i>
+        <h5 class="text-muted mb-2">Activity Tracking</h5>
+        <p class="text-muted mb-3">Track recent activities and updates in your mess</p>
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Activity tracking feature will be implemented in the next update.
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-fadeIn');
+    });
+    
+    const quickActionBtns = document.querySelectorAll('.quick-action-btn');
+    quickActionBtns.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const originalHtml = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Loading...';
+            this.classList.add('loading');
+
+            setTimeout(() => {
+                if (this.isConnected) { 
+                    this.innerHTML = originalHtml;
+                    this.classList.remove('loading');
+                }
+            }, 2000);
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

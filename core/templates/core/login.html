@@ -1,0 +1,195 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Login - Mess Manager{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    
+    .auth-card {
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: var(--border-radius);
+        padding: 2.5rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        width: 100%;
+        max-width: 400px;
+        margin: 1rem;
+    }
+    
+    .auth-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .auth-icon {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+    
+    .auth-title {
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+    }
+    
+    .auth-subtitle {
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+    
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-floating .form-control {
+        border-radius: 10px;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e9ecef;
+        height: calc(3.5rem + 2px);
+        font-size: 1rem;
+    }
+    
+    .form-floating label {
+        padding: 1rem 1.25rem;
+        color: #6c757d;
+        font-size: 0.95rem;
+    }
+    
+    .form-floating .form-control:focus ~ label,
+    .form-floating .form-control:not(:placeholder-shown) ~ label {
+        transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+        color: var(--primary);
+    }
+    
+    .auth-footer {
+        text-align: center;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    @media (max-width: 480px) {
+        .auth-card {
+            padding: 2rem 1.5rem;
+            margin: 0.5rem;
+        }
+        
+        .auth-icon {
+            font-size: 3rem;
+        }
+        
+        .auth-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card animate-slideIn">
+        <div class="auth-header">
+            <i class="fas fa-sign-in-alt auth-icon"></i>
+            <h2 class="auth-title">Welcome Back</h2>
+            <p class="auth-subtitle">Sign in to your Mess Manager account</p>
+        </div>
+        
+        <form method="post" id="loginForm">
+            {% csrf_token %}
+            
+            <div class="form-floating">
+                <input type="text" class="form-control" id="id_username" name="username" 
+                       placeholder="Username" required autocomplete="username" autofocus>
+                <label for="id_username"><i class="fas fa-user me-2"></i>Username</label>
+            </div>
+            
+            <div class="form-floating">
+                <input type="password" class="form-control" id="id_password" name="password" 
+                       placeholder="Password" required autocomplete="current-password">
+                <label for="id_password"><i class="fas fa-lock me-2"></i>Password</label>
+            </div>
+            
+            <button type="submit" class="btn btn-primary w-100 py-3 fw-semibold">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </button>
+        </form>
+        
+        <div class="auth-footer">
+            <p class="text-muted mb-0">Don't have an account? 
+                <a href="{% url 'signup' %}" class="text-primary text-decoration-none fw-semibold">
+                    Create Account
+                </a>
+            </p>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loginForm = document.getElementById('loginForm');
+    
+    if (loginForm) {
+        loginForm.addEventListener('submit', function(e) {
+            const username = this.querySelector('#id_username');
+            const password = this.querySelector('#id_password');
+            let hasError = false;
+
+            document.querySelectorAll('.is-invalid').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('.invalid-feedback').forEach(el => {
+                el.remove();
+            });
+            
+            if (!username.value.trim()) {
+                showError(username, 'Please enter your username');
+                hasError = true;
+            }
+            
+            if (!password.value) {
+                showError(password, 'Please enter your password');
+                hasError = true;
+            }
+            
+            if (hasError) {
+                e.preventDefault();
+            }
+        });
+    }
+    
+    function showError(input, message) {
+        input.classList.add('is-invalid');
+        
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'invalid-feedback';
+        errorDiv.textContent = message;
+        input.parentNode.appendChild(errorDiv);
+    }
+    
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+            const error = this.parentNode.querySelector('.invalid-feedback');
+            if (error) {
+                error.remove();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

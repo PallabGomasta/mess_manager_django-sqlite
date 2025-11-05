@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ mess.name }} - Monthly Report - {{ month }}</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body { 
+            font-family: 'Hind Siliguri', Arial, sans-serif; 
+            margin: 0;
+            padding: 16px;
+            font-size: 14px;
+            color: #333333;
+            line-height: 1.6;
+            background-color: #f5f7fa;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        
+        /* Header Styles */
+        .header { 
+            text-align: center; 
+            padding: 30px;
+            background: linear-gradient(135deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            position: relative;
+        }
+        
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #28a745, #ffc107);
+        }
+        
+        .header h1 { 
+            margin: 0 0 8px 0; 
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .header p { 
+            margin: 5px 0; 
+            font-size: 15px;
+            opacity: 0.9;
+        }
+        
+        /* Report Info */
+        .report-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .info-item {
+            text-align: center;
+            padding: 10px;
+            min-width: 180px;
+        }
+        
+        .info-item strong {
+            display: block;
+            font-size: 14px;
+            color: #343a40;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .info-item span {
+            font-size: 15px;
+            font-weight: 600;
+            color: #4b6cb7;
+            display: inline-block;
+            padding: 6px 12px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        
+        /* Summary Grid */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            padding: 25px;
+            background: white;
+        }
+        
+        .summary-card {
+            text-align: center;
+            padding: 20px 15px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #dee2e6;
+        }
+        
+        .summary-icon {
+            font-size: 28px;
+            margin-bottom: 12px;
+            color: #4b6cb7;
+        }
+        
+        .summary-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #182848;
+            margin-bottom: 8px;
+        }
+        
+        .summary-label {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        /* Section Styles */
+        .section { 
+            padding: 25px;
+            page-break-inside: avoid;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        .section-title { 
+            color: #182848; 
+            padding: 0 0 16px 0;
+            margin: 0 0 20px 0;
+            font-size: 20px;
+            font-weight: 600;
+            border-bottom: 2px solid #4b6cb7;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #4b6cb7;
+            border-radius: 50%;
+            margin-right: 12px;
+        }
+        
+        /* Table Styles */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .table { 
+            width: 100%; 
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 13px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .table th { 
+            background-color: #4b6cb7; 
+            color: white; 
+            padding: 14px 12px; 
+            text-align: left; 
+            font-weight: 600;
+            border: none;
+        }
+        
+        .table th:first-child {
+            border-top-left-radius: 8px;
+        }
+        
+        .table th:last-child {
+            border-top-right-radius: 8px;
+        }
+        
+        .table td { 
+            padding: 12px; 
+            border: none;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+        
+        .table tr:nth-child(even) {
+            background-color: #fafbfc;
+        }
+        
+        .table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .table tr:last-child td:first-child {
+            border-bottom-left-radius: 8px;
+        }
+        
+        .table tr:last-child td:last-child {
+            border-bottom-right-radius: 8px;
+        }
+        
+        .positive { 
+            color: #28a745;
+            font-weight: 600;
+        }
+        
+        .negative { 
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        /* Badge Styles */
+        .role-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .role-manager {
+            background-color: #4b6cb7;
+            color: white;
+        }
+        
+        .role-member {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        /* Alignment Utilities */
+        .text-center {
+            text-align: center;
+        }
+        
+        .text-right {
+            text-align: right;
+        }
+        
+        /* Footer Styles */
+        .footer {
+            padding: 25px;
+            text-align: center;
+            background: linear-gradient(to right, #f8f9fa, #e9ecef);
+            border-top: 1px solid #dee2e6;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #4b6cb7;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo::before {
+            content: '🍽';
+            margin-right: 8px;
+            font-size: 24px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                font-size: 13px;
+            }
+            
+            .header {
+                padding: 20px 15px;
+            }
+            
+            .header h1 {
+                font-size: 22px;
+            }
+            
+            .report-info {
+                flex-direction: column;
+                align-items: center;
+                padding: 15px;
+            }
+            
+            .info-item {
+                width: 100%;
+                margin-bottom: 15px;
+            }
+            
+            .info-item:last-child {
+                margin-bottom: 0;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+                padding: 15px;
+                gap: 12px;
+            }
+            
+            .summary-card {
+                padding: 15px;
+            }
+            
+            .section {
+                padding: 20px 15px;
+            }
+            
+            .section-title {
+                font-size: 18px;
+            }
+            
+            .table {
+                font-size: 12px;
+            }
+            
+            .table th, 
+            .table td {
+                padding: 10px 8px;
+            }
+            
+            .footer {
+                padding: 20px 15px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .header p {
+                font-size: 13px;
+            }
+            
+            .summary-value {
+                font-size: 20px;
+            }
+            
+            .section-title {
+                font-size: 16px;
+            }
+            
+            .table {
+                font-size: 11px;
+            }
+            
+            .table th, 
+            .table td {
+                padding: 8px 6px;
+            }
+            
+            .role-badge {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+        }
+        
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                font-size: 12px;
+            }
+            
+            .container {
+                box-shadow: none;
+                border-radius: 0;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .summary-grid {
+                padding: 15px;
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .section {
+                padding: 15px;
+            }
+            
+            .table {
+                font-size: 11px;
+            }
+            
+            .footer {
+                padding: 15px;
+            }
+            
+            .summary-card,
+            .table-container {
+                page-break-inside: avoid;
+            }
+        }
+        
+        .total-row {
+            background-color: #eef2f8 !important;
+            font-weight: 700;
+        }
+        
+        .total-row td {
+            border-top: 2px solid #4b6cb7 !important;
+        }
+        
+        .currency {
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ mess.name }}</h1>
+            <p>Monthly Expense Report - {{ month }}</p>
+            <p>Generated on: {% now "j F Y, g:i A" %}</p>
+        </div>
+        
+        <div class="report-info">
+            <div class="info-item">
+                <strong>Address</strong>
+                <span>{{ mess.address }}</span>
+            </div>
+            <div class="info-item">
+                <strong>Mess Code</strong>
+                <span>{{ mess.code }}</span>
+            </div>
+            <div class="info-item">
+                <strong>Report Period</strong>
+                <span>{{ month }}</span>
+            </div>
+        </div>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-icon">🍽</div>
+                <div class="summary-value">{{ grand_total_meals }}</div>
+                <div class="summary-label">Total Meals</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">💰</div>
+                <div class="summary-value"><span class="currency"></span>{{ total_expense|floatformat:2 }}</div>
+                <div class="summary-label">Total Expenses</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">💵</div>
+                <div class="summary-value"><span class="currency"></span>{{ total_deposit|floatformat:2 }}</div>
+                <div class="summary-label">Total Deposit</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-icon">📊</div>
+                <div class="summary-value"><span class="currency"></span>{{ meal_rate|floatformat:2 }}</div>
+                <div class="summary-label">Meal Rate</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-title">
+                Member-wise Summary
+            </div>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th class="text-center">Role</th>
+                            <th class="text-center">Meals</th>
+                            <th class="text-right">Cost</th>
+                            <th class="text-right">Deposit</th>
+                            <th class="text-right">Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in member_reports %}
+                        <tr>
+                            <td>{{ report.user.get_full_name|default:report.user.username }}</td>
+                            <td class="text-center">
+                                <span class="role-badge role-{{ report.role }}">
+                                    {{ report.role|title }}
+                                </span>
+                            </td>
+                            <td class="text-center">{{ report.total_meal }}</td>
+                            <td class="text-right">{{ report.total_cost|floatformat:2 }}</td>
+                            <td class="text-right">{{ report.total_deposit|floatformat:2 }}</td>
+                            <td class="text-right {% if report.balance >= 0 %}positive{% else %}negative{% endif %}">
+                                {{ report.balance|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if expenses %}
+        <div class="section">
+            <div class="section-title">
+                Expense Details
+            </div>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th class="text-right">Amount</th>
+                            <th>Added By</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.date|date:"d/m/Y" }}</td>
+                            <td>{{ expense.description }}</td>
+                            <td class="text-right">{{ expense.amount|floatformat:2 }}</td>
+                            <td>{{ expense.created_by.get_full_name|default:expense.created_by.username }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="total-row">
+                            <td colspan="2" class="text-right">Total Expenses:</td>
+                            <td class="text-right"><span class="currency"></span>{{ total_expense|floatformat:2 }}</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if deposits %}
+        <div class="section">
+            <div class="section-title">
+                Deposit Details
+            </div>
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Member</th>
+                            <th class="text-right">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for deposit in deposits %}
+                        <tr>
+                            <td>{{ deposit.date|date:"d/m/Y" }}</td>
+                            <td>{{ deposit.user.get_full_name|default:deposit.user.username }}</td>
+                            <td class="text-right">{{ deposit.amount|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr class="total-row">
+                            <td colspan="2" class="text-right">Total Deposits:</td>
+                            <td class="text-right"><span class="currency"></span>{{ total_deposit|floatformat:2 }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="footer">
+            <div class="logo">Mess Manager</div>
+            <p>This report was automatically generated by the Mess Management System</p>
+            <p>© {% now "Y" %} Mess Manager. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,332 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Messages - {{ mess.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .messages-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .message-form-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .messages-list-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        max-height: 600px;
+        overflow-y: auto;
+    }
+    
+    .message-item {
+        border-left: 4px solid var(--primary);
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        background: var(--light);
+        border-radius: var(--border-radius);
+        transition: var(--transition);
+        position: relative;
+    }
+    
+    .message-item:hover {
+        transform: translateX(5px);
+        background: #f0f4ff;
+    }
+    
+    .message-item.own-message {
+        border-left-color: var(--success);
+        background: linear-gradient(90deg, #e8f5e8 0%, #f0f4ff 100%);
+    }
+    
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .message-sender {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .sender-name {
+        font-weight: 600;
+        color: var(--dark);
+        margin: 0;
+    }
+    
+    .message-badges {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .message-time {
+        color: #6c757d;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .message-time i {
+        margin-right: 0.25rem;
+    }
+    
+    .message-content {
+        color: #2c3e50;
+        line-height: 1.6;
+        margin: 0;
+        word-wrap: break-word;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .message-textarea {
+        border-radius: 12px;
+        padding: 1rem;
+        border: 2px solid #e9ecef;
+        resize: vertical;
+        min-height: 120px;
+        transition: var(--transition);
+    }
+    
+    .message-textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.3rem rgba(102, 126, 234, 0.15);
+    }
+    
+    .send-btn {
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6c757d;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .scroll-to-bottom {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        background: var(--primary);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: var(--transition);
+        z-index: 1000;
+    }
+    
+    .scroll-to-bottom:hover {
+        transform: translateY(-3px);
+        color: white;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    @media (max-width: 768px) {
+        .messages-container {
+            gap: 1rem;
+        }
+        
+        .message-form-card,
+        .messages-list-card {
+            padding: 1rem;
+        }
+        
+        .message-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .message-time {
+            margin-top: 0.25rem;
+        }
+        
+        .scroll-to-bottom {
+            bottom: 1rem;
+            right: 1rem;
+            width: 45px;
+            height: 45px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-1">Mess Messages</h2>
+            <p class="mb-0 opacity-90">{{ mess.name }}</p>
+        </div>
+        <a href="{% url 'mess_dashboard' mess.id %}" class="btn btn-light">
+            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="messages-container">
+    <!-- Message Form -->
+    <div class="message-form-card">
+        <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-paper-plane text-success fs-4 me-3"></i>
+            <h5 class="text-success mb-0">Send Message</h5>
+        </div>
+        
+        <form method="post" id="messageForm">
+            {% csrf_token %}
+            <div class="form-group">
+                <textarea name="content" class="form-control message-textarea" 
+                          placeholder="Type your message here..." required
+                          oninput="autoResize(this)"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success send-btn">
+                <i class="fas fa-paper-plane me-2"></i>Send Message
+            </button>
+        </form>
+    </div>
+
+    <!-- Messages List -->
+    <div class="messages-list-card">
+        <div class="d-flex align-items-center mb-3">
+            <i class="fas fa-comments text-primary fs-4 me-3"></i>
+            <h5 class="text-primary mb-0">Recent Messages</h5>
+        </div>
+        
+        {% if messages %}
+        <div class="message-list">
+            {% for msg in messages %}
+            <div class="message-item {% if msg.user == request.user %}own-message{% endif %}">
+                <div class="message-header">
+                    <div class="message-sender">
+                        <strong class="sender-name">{{ msg.user.username }}</strong>
+                        <div class="message-badges">
+                            {% if msg.user == request.user %}
+                            <span class="badge bg-info">You</span>
+                            {% endif %}
+                            {% if msg.user.membership_set.get.mess.id == mess.id and msg.user.membership_set.get.role == 'manager' %}
+                            <span class="badge bg-warning">Manager</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <small class="message-time">
+                        <i class="fas fa-clock me-1"></i>{{ msg.created_at|timesince }} ago
+                    </small>
+                </div>
+                <p class="message-content">{{ msg.content }}</p>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <a href="#" class="scroll-to-bottom" id="scrollToBottom" style="display: none;">
+            <i class="fas fa-arrow-down"></i>
+        </a>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-comments empty-state-icon"></i>
+            <h4 class="text-muted mb-2">No messages yet</h4>
+            <p class="text-muted">Be the first to start a conversation!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+function autoResize(textarea) {
+    textarea.style.height = 'auto';
+    textarea.style.height = (textarea.scrollHeight) + 'px';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.querySelector('.messages-list-card');
+    const scrollToBottomBtn = document.getElementById('scrollToBottom');
+
+    if (messagesContainer) {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    if (messagesContainer && scrollToBottomBtn) {
+        messagesContainer.addEventListener('scroll', function() {
+            const scrollThreshold = 200;
+            const isNearBottom = messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < scrollThreshold;
+            
+            scrollToBottomBtn.style.display = isNearBottom ? 'none' : 'flex';
+        });
+        
+        scrollToBottomBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            messagesContainer.scrollTo({
+                top: messagesContainer.scrollHeight,
+                behavior: 'smooth'
+            });
+        });
+    }
+    
+    const messageForm = document.getElementById('messageForm');
+    if (messageForm) {
+        messageForm.addEventListener('submit', function() {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Sending...';
+                submitBtn.disabled = true;
+            }
+        });
+    }
+    
+    document.querySelectorAll('textarea').forEach(autoResize);
+});
+
+function scrollToNewMessage() {
+    const messagesContainer = document.querySelector('.messages-list-card');
+    if (messagesContainer) {
+        messagesContainer.scrollTo({
+            top: messagesContainer.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+}
+</script>
+{% endblock %}
+{% endblock %}

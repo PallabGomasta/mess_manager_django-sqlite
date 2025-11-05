@@ -1,0 +1,410 @@
+
+<div class="modal fade" id="joinMessModal" tabindex="-1" aria-labelledby="joinMessModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <div class="modal-header-content">
+                    <i class="fas fa-sign-in-alt modal-header-icon"></i>
+                    <div>
+                        <h5 class="modal-title" id="joinMessModalLabel">Join Existing Mess</h5>
+                        <p class="modal-subtitle">Enter the mess code to join your friends</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <form method="post" action="{% url 'join_mess' %}" id="joinMessForm" novalidate>
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="messCode" class="form-label">
+                            <i class="fas fa-key me-2"></i>Mess Code *
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light">
+                                <i class="fas fa-hashtag text-muted"></i>
+                            </span>
+                            <input type="text" class="form-control" id="messCode" name="code" 
+                                   required pattern="[0-9]{6}" maxlength="6"
+                                   placeholder="000000" inputmode="numeric"
+                                   autocomplete="off">
+                        </div>
+                        <div class="form-text">Enter the 6-digit code provided by your mess manager</div>
+                        <div class="invalid-feedback" id="codeError">Please enter a valid 6-digit mess code</div>
+                    </div>
+
+                    <div class="instructions-card">
+                        <h6 class="text-success mb-3">
+                            <i class="fas fa-info-circle me-2"></i>Where to find the code?
+                        </h6>
+                        <div class="instructions-list">
+                            <div class="instruction-item">
+                                <i class="fas fa-user-check text-primary"></i>
+                                <span>Ask your mess manager for the 6-digit code</span>
+                            </div>
+                            <div class="instruction-item">
+                                <i class="fas fa-comment-alt text-info"></i>
+                                <span>Check your group chat or messages</span>
+                            </div>
+                            <div class="instruction-item">
+                                <i class="fas fa-envelope text-warning"></i>
+                                <span>Look for an email invitation</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="submit" class="btn btn-success w-100 py-3" id="joinMessBtn">
+                            <i class="fas fa-sign-in-alt me-2"></i>Join Mess
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <p class="text-muted small mb-0">
+                    <i class="fas fa-shield-alt me-1"></i>
+                    Your mess manager must approve your join request.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--success), #2ecc71);
+        border: none;
+        padding: 1.5rem;
+    }
+
+    .modal-header-content {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        flex: 1;
+    }
+
+    .modal-header-icon {
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.9);
+    }
+
+    .modal-title {
+        font-weight: 700;
+        margin: 0;
+        color: white;
+    }
+
+    .modal-subtitle {
+        font-size: 0.9rem;
+        margin: 0;
+        opacity: 0.9;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        background: #f8f9fa;
+        padding: 1rem 2rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-group {
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .input-group-text {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-right: none;
+        padding: 1rem;
+    }
+
+    .form-control {
+        border-radius: 0 12px 12px 0;
+        padding: 1rem 1.25rem;
+        border: 2px solid #e9ecef;
+        border-left: none;
+        font-size: 1.25rem;
+        font-weight: 600;
+        letter-spacing: 2px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--success);
+        box-shadow: 0 0 0 0.3rem rgba(40, 167, 69, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .form-control.is-invalid {
+        border-color: var(--danger);
+        background-image: none;
+    }
+
+    .form-text {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 0.5rem;
+    }
+
+    .invalid-feedback {
+        font-size: 0.85rem;
+        color: var(--danger);
+        margin-top: 0.25rem;
+    }
+
+    .instructions-card {
+        background: linear-gradient(135deg, #f0f9f0, #e8f5e8);
+        border: 1px solid #d4edda;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .instructions-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .instruction-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 0.9rem;
+        color: #155724;
+    }
+
+    .instruction-item i {
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .modal-actions {
+        margin-top: 2rem;
+    }
+
+    .btn {
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .btn:hover::before {
+        left: 100%;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(40, 167, 69, 0.3);
+    }
+
+    .code-input {
+        font-family: 'Courier New', monospace;
+    }
+
+    @media (max-width: 576px) {
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-header {
+            padding: 1.25rem;
+        }
+
+        .modal-header-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 0.5rem;
+        }
+
+        .form-control {
+            padding: 0.875rem 1rem;
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            padding: 0.875rem;
+        }
+
+        .instructions-card {
+            padding: 1.25rem;
+        }
+    }
+
+    @keyframes modalSlideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-50px) scale(0.95);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .modal.fade .modal-dialog {
+        animation: modalSlideIn 0.3s ease-out;
+    }
+
+    .btn-loading {
+        position: relative;
+        color: transparent !important;
+    }
+
+    .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin: -10px 0 0 -10px;
+        border: 2px solid transparent;
+        border-top: 2px solid currentColor;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    .form-control:focus {
+        animation: pulse 0.3s ease;
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('joinMessForm');
+    const submitBtn = document.getElementById('joinMessBtn');
+    const codeInput = document.getElementById('messCode');
+
+    codeInput.addEventListener('input', function(e) {
+        let value = this.value.replace(/\D/g, '');
+        
+        if (value.length > 6) {
+            value = value.slice(0, 6);
+        }
+        
+        this.value = value;
+        
+        if (value.length === 6) {
+            this.classList.remove('is-invalid');
+        } else if (value.length > 0) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+
+    codeInput.addEventListener('keypress', function(e) {
+        if (!/[0-9]/.test(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    codeInput.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const text = (e.clipboardData || window.clipboardData).getData('text');
+        const numbers = text.replace(/\D/g, '').slice(0, 6);
+        this.value = numbers;
+
+        const event = new Event('input', { bubbles: true });
+        this.dispatchEvent(event);
+    });
+
+    function validateForm() {
+        const codeValue = codeInput.value.trim();
+        
+        if (codeValue.length !== 6 || !/^\d{6}$/.test(codeValue)) {
+            codeInput.classList.add('is-invalid');
+            return false;
+        }
+        
+        codeInput.classList.remove('is-invalid');
+        return true;
+    }
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!validateForm()) {
+            codeInput.focus();
+            codeInput.select();
+            return;
+        }
+
+        submitBtn.classList.add('btn-loading');
+        submitBtn.disabled = true;
+
+        setTimeout(() => {
+            this.submit();
+        }, 1000);
+    });
+
+    $('#joinMessModal').on('show.bs.modal', function() {
+        form.reset();
+        codeInput.classList.remove('is-invalid');
+        submitBtn.classList.remove('btn-loading');
+        submitBtn.disabled = false;
+    });
+
+    $('#joinMessModal').on('shown.bs.modal', function() {
+        codeInput.focus();
+    });
+
+    codeInput.addEventListener('focus', function() {
+        this.select();
+    });
+});
+</script>

@@ -1,0 +1,395 @@
+{% extends 'core/base.html' %}
+
+{% block title %}My Dashboard - {{ mess.name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        color: white;
+        box-shadow: var(--box-shadow);
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2.5rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        transition: var(--transition);
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-card i {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .stat-card h3 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+    }
+    
+    .stat-card p {
+        color: #6c757d;
+        margin: 0;
+        font-weight: 500;
+    }
+    
+    .balance-positive {
+        color: var(--success) !important;
+    }
+    
+    .balance-negative {
+        color: var(--danger) !important;
+    }
+    
+    .data-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .data-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+    
+    .data-card-header {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: white;
+        padding: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .data-card-body {
+        padding: 1.5rem;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .data-table th {
+        background: #f8f9fa;
+        padding: 0.75rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        border-bottom: 2px solid #e9ecef;
+    }
+    
+    .data-table td {
+        padding: 0.75rem;
+        border-bottom: 1px solid #f1f3f4;
+    }
+    
+    .data-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .data-table tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-top: 2rem;
+    }
+    
+    .quick-action-btn {
+        background: white;
+        border-radius: var(--border-radius);
+        padding: 1.25rem 1rem;
+        text-align: center;
+        text-decoration: none;
+        color: var(--dark);
+        box-shadow: var(--box-shadow);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .quick-action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        color: var(--primary);
+        text-decoration: none;
+    }
+    
+    .quick-action-btn i {
+        font-size: 1.75rem;
+        margin-bottom: 0.75rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .quick-action-btn span {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+    
+    .empty-data {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+    
+    .empty-data i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    @media (max-width: 768px) {
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .data-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .data-card-body {
+            padding: 1rem;
+            max-height: 300px;
+        }
+        
+        .quick-actions {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .stat-card {
+            padding: 1.25rem;
+        }
+        
+        .stat-card h3 {
+            font-size: 1.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div>
+            <h2 class="fw-bold mb-2">My Dashboard</h2>
+            <p class="mb-0 opacity-90">{{ mess.name }}</p>
+            <small class="opacity-75">{{ mess.address }}</small>
+        </div>
+        <a href="{% url 'member_mess_list' %}" class="btn btn-light">
+            <i class="fas fa-arrow-left me-2"></i>Back to Mess List
+        </a>
+    </div>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <i class="fas fa-utensils"></i>
+        <h3>{{ total_meals }}</h3>
+        <p>My Total Meals</p>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-piggy-bank"></i>
+        <h3>{{ total_deposit|floatformat:2 }}</h3>
+        <p>My Total Deposit</p>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-money-bill-wave"></i>
+        <h3>{{ total_cost|floatformat:2 }}</h3>
+        <p>My Total Cost</p>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-scale-balanced"></i>
+        <h3 class="{% if balance >= 0 %}balance-positive{% else %}balance-negative{% endif %}">
+            {{ balance|floatformat:2 }}
+        </h3>
+        <p>My Balance</p>
+    </div>
+</div>
+
+<div class="glass-card p-3 mb-4">
+    <div class="row text-center">
+        <div class="col-md-4">
+            <small class="text-muted">Meal Rate</small>
+            <h6 class="mb-0 fw-bold">{{ meal_rate|floatformat:2 }}</h6>
+        </div>
+        <div class="col-md-4">
+            <small class="text-muted">Current Month</small>
+            <h6 class="mb-0 fw-bold">{{ month }}</h6>
+        </div>
+        <div class="col-md-4">
+            <small class="text-muted">My Role</small>
+            <h6 class="mb-0 fw-bold">
+                <span class="badge bg-secondary">Member</span>
+            </h6>
+        </div>
+    </div>
+</div>
+
+<div class="data-grid">
+    <div class="data-card">
+        <div class="data-card-header">
+            <i class="fas fa-utensils"></i>
+            My Meals - {{ month }}
+        </div>
+        <div class="data-card-body">
+            {% if member_meals %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Breakfast</th>
+                            <th>Lunch</th>
+                            <th>Dinner</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for meal in member_meals %}
+                        <tr>
+                            <td>{{ meal.date|date:"M d" }}</td>
+                            <td>{{ meal.breakfast }}</td>
+                            <td>{{ meal.lunch }}</td>
+                            <td>{{ meal.dinner }}</td>
+                            <td><strong>{{ meal.breakfast|add:meal.lunch|add:meal.dinner }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-data">
+                <i class="fas fa-utensils"></i>
+                <h5 class="text-muted">No Meals Recorded</h5>
+                <p class="text-muted">No meals recorded for this month</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="data-card">
+        <div class="data-card-header">
+            <i class="fas fa-piggy-bank"></i>
+            My Deposits - {{ month }}
+        </div>
+        <div class="data-card-body">
+            {% if member_deposits %}
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for deposit in member_deposits %}
+                        <tr>
+                            <td>{{ deposit.date|date:"M d, Y" }}</td>
+                            <td><strong class="text-success">{{ deposit.amount|floatformat:2 }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                        {% if total_deposit %}
+                        <tr class="fw-bold" style="background-color: #f8f9fa;">
+                            <td>Total</td>
+                            <td class="text-success">{{ total_deposit|floatformat:2 }}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-data">
+                <i class="fas fa-piggy-bank"></i>
+                <h5 class="text-muted">No Deposits</h5>
+                <p class="text-muted">No deposits recorded for this month</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="quick-actions">
+    <a href="{% url 'member_members' mess.id %}" class="quick-action-btn">
+        <i class="fas fa-users"></i>
+        <span>View Members</span>
+    </a>
+    <a href="{% url 'member_messages' mess.id %}" class="quick-action-btn">
+        <i class="fas fa-comments"></i>
+        <span>Messages</span>
+    </a>
+    <a href="{% url 'member_mess_list' %}" class="quick-action-btn">
+        <i class="fas fa-list"></i>
+        <span>My Messes</span>
+    </a>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-fadeIn');
+    });
+
+    const dataBodies = document.querySelectorAll('.data-card-body');
+    dataBodies.forEach(body => {
+        if (body.scrollHeight > body.clientHeight) {
+            body.style.borderBottom = '1px solid #f1f3f4';
+        }
+    });
+    
+    const balanceElement = document.querySelector('.balance-negative');
+    if (balanceElement) {
+        const balance = parseFloat('{{ balance }}');
+        if (balance < 0) {
+            setTimeout(() => {
+                alert('⚠️ Your balance is negative. Please consider making a deposit soon.');
+            }, 2000);
+        }
+    }
+});
+</script>
+{% endblock %}
+{% endblock %}
